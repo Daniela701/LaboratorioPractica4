@@ -20,6 +20,7 @@ Redes::Redes()
     letra=conexiones[0];
     nombres.push_back(letra);
 
+    //Ciclo para almacenar en listas la informacion proporcionada por el usuario
     while(conexiones!="0"){
 
         enrut="";
@@ -96,6 +97,7 @@ Redes::Redes(string namef){
     letra=conexiones[0];
     nombres.push_back(letra);
 
+    //Ciclo para almacenar en listas la informacion leida en el archivo
     while(!read.eof()){
 
         enrut="";
@@ -152,17 +154,22 @@ void Redes::CargarEnrutadores(){
 
     string op="",enrt="";
     while(op!="0"){
-        map<string,int> RutaDirectaA,RutaDirectaB,RutaDirectaC,RutaDirectaD,RutaDirectaE,RutaDirectaF,RutaDirectaG;
-        map<string,int> TeA,TeB,TeC,TeD,TeE,TeF,TeG;
+        map<string,int> RutaDirectaA=vacio,RutaDirectaB=vacio,RutaDirectaC=vacio,RutaDirectaD=vacio,RutaDirectaE=vacio,RutaDirectaF=vacio,RutaDirectaG=vacio;
+        map<string,int> TeA=vacio,TeB=vacio,TeC=vacio,TeD=vacio,TeE=vacio,TeF=vacio,TeG=vacio;
         bool pass=false;
 
-        pass=CargarRutasDirectas("A");
+        e=vacioS;
+        c=vacioI;
+        TEe=vacioS;
+        TEc=vacioI;
+
+        pass=CargarRutasDirectas("A");//Almacena en listas las rutas directas de el enrutador
 
         if(pass){
-            CalcularRutas("A");
-            Enrutador A(e,c);
-            RutaDirectaA=A.GetTablaRutaDirecta();
-            TeA=A.TablaDeEnrtActualizada(TEe,TEc);
+            CalcularRutas("A");//Calcula cierta cantidad de rutas posibles con sus costos
+            Enrutador A(e,c);//Manda al enrutador las listas con las rutas directas
+            RutaDirectaA=A.GetTablaRutaDirecta();//Se obtiene la tabla de rutas directas
+            TeA=A.TablaDeEnrtActualizada(TEe,TEc);//Se obtiene la tabla de enrutamiento con costos minimos
 
         }
         e=vacioS;
@@ -249,11 +256,12 @@ void Redes::CargarEnrutadores(){
             TeG=G.TablaDeEnrtActualizada(TEe,TEc);
         }
 
+        //menu
         cout<<"Elija una de las siguientes opciones:"<<endl;
         cout<<"0. Salir"<<endl;
         cout<<"1. Agregar enrutadores (si aun no se ha excedio del limite de 7 enrutadores)"<<endl;
         cout<<"2. Remover enrutadores"<<endl;
-        cout<<"3. Cambiar enlaces y costos"<<endl;
+        cout<<"3. Cambiar los costos de los enlaces"<<endl;
         cout<<"4. Mostrar tabla de enrutamiento (caminos con los costos minimos)"<<endl;
         cout<<"5. Mostrar tabla de conexiones directas vs tabla de enrutamiento"<<endl;
         cin>>op;
@@ -392,6 +400,7 @@ bool Redes::CargarRutasDirectas(string enrt){
     string letra;
     bool pass=false;
 
+    //Se almacenan solo las rutas directas de cierto enrutador
     iterador1=enrutadores.begin();
     while(iterador1!=enrutadores.end()){
           cont2=0;
@@ -423,6 +432,7 @@ void Redes::CalcularRutas(string enrt){
     int c1,c2,c3,c4,costo1,costo,suma;
 
 
+    //Se calculan las rutas posibles con sus costos para cierto enrutador
     suma=0;
     origen=enrt;
     it1=nombres.begin();
@@ -532,8 +542,8 @@ void Redes::CalcularRutas(string enrt){
 void Redes::AgregarEnrutadores(){
 
     list<string>::iterator it;
-    int cont=0;
-    string nuevo,op;
+    int cont=0,numero,num,longitud;
+    string nuevo,op,enrt;
     bool pass=true;
 
     it=nombres.begin();
@@ -561,12 +571,41 @@ void Redes::AgregarEnrutadores(){
             nombres.push_back(nuevo);
             system("CLS");
             cout<<"Ahora digite por favor las conexiones directas al nuevo enrutador (<Enrutador Origen> <Enrutador Destino>, costo) "<<endl;
+            cout<<"Despues de digitar una conexion por favor digitar tambien su viceversa, es decir si digita AB,6 debera digitar tambien BA,6"<<endl;
             cout<<"Digite el numero 0 cuando ya no quiera agregar mas conexiones"<<endl;
             cout<<"Primera conexion:"<<endl;
             cin>>op;
 
             while(op!="0"){
-                enrutadores.push_back(op);
+                longitud=op.size();
+                pass=false;
+                cont=0;
+                for(int i=0; i<longitud;i++){
+                    if(op[i]==','){
+                        pass=true;
+                        i++;
+                    }
+                    if(pass){
+                        if(cont>0){
+                            numero*=10;
+                            num=op[i];
+                            num-=48;
+                            numero+=num;
+                        }
+                        else{
+                            numero=op[i];
+                            numero-=48;
+                        }
+                        cont++;
+                    }
+                    else{
+                        enrt+=op[i];
+                    }
+                }
+                enrutadores.push_back(enrt);
+                costos.push_back(numero);
+                enrt="";
+                numero=0;
                 cout<<"Digite el siguiente"<<endl;
                 cin>>op;
             }
@@ -583,7 +622,7 @@ void Redes::RemoverEnrutadores(){
     list<int> aux2;
     list<string>::iterator it1,it2;
     list<int>::iterator it3;
-    string enrt, primera;
+    string enrt, primera, ultima;
 
     system("CLS");
     cout<<"Escriba el nombre del enrutador a eliminar"<<endl;
@@ -602,8 +641,9 @@ void Redes::RemoverEnrutadores(){
     it3=costos.begin();
     while(it2!=enrutadores.end() and it3!=costos.end()){
         primera=*it2;
+        ultima=primera[1];
         primera=primera[0];
-        if(primera!=enrt){
+        if(primera!=enrt and ultima!=enrt){
             aux1.push_back(*it2);
             aux2.push_back(*it3);
         }
@@ -624,46 +664,17 @@ void Redes::CamEnlacesyCostos(){
     list<int>::iterator it2;
     list<string> Auxiliar;
     list<int> aux;
-    string op="",enlace="", nuevo="",enrt="", enrt2="";
-    int longitud=0, longitud2=0,numero, numero2,num,cont=0;
+    string enlace="",enrt="", enrt2="",primera="",ultima="",cad="";
+    int longitud=0,numero,num,cont=0,nuevo=0;
     bool pass=false;
 
-    system("CLS");
-    cout<<"Digite:"<<endl;
-    cout<<"1. Para cambiar solo un enlace"<<endl;
-    cout<<"2. Para cambiar un enlace y tambien su costo"<<endl;
-    cout<<"ADVERTERNCIA: Debe ser muy cuidadoso al hacer este proceso, ya que si lo digita incorrectamente el programa no dara el resultado esperado"<<endl;
-    cin>>op;
-
-    if(op=="1"){
-
         system("CLS");
-        cout<<"Escriba el enlace a cambiar (<Origen><Destino>)"<<endl;
+        cout<<"Escriba el enlace con su costo a cambiar (<Origen><Destino>,costo)"<<endl;
         cin>>enlace;
-        cout<<"Escriba el nuevo enlace (<Origen><Destino>)"<<endl;
-        cin>>nuevo;
-
-        it1=enrutadores.begin();
-        while(it1!=enrutadores.end()){
-            if(*it1!=enlace){
-                Auxiliar.push_back(*it1);
-            }
-            else{
-                Auxiliar.push_back(nuevo);
-            }
-            it1++;
-        }
-    }
-    else if(op=="2"){
-
-        system("CLS");
-        cout<<"Escriba el enlace a cambiar con su costo (<Origen><Destino>,costo)"<<endl;
-        cin>>enlace;
-        cout<<"Escriba el nuevo enlace con su nuevo costo(<Origen><Destino>,costo)"<<endl;
+        cout<<" Digite el nuevo valor del enlace "<<endl;
         cin>>nuevo;
 
         longitud=enlace.size();
-        longitud2=nuevo.size();
 
         for(int i=0; i<longitud;i++){
             if(enlace[i]==','){
@@ -684,53 +695,31 @@ void Redes::CamEnlacesyCostos(){
                 cont++;
             }
             else{
-                enrt=enlace[i];
+                enrt+=enlace[i];
             }
         }
-        pass=false;
-        cont=0;
+        //tambien se cambia el costo del enrutador viceversa
+        primera=enrt[0];
+        ultima=enrt[1];
+        cad=ultima+primera;
         it1=enrutadores.begin();
         it2=costos.begin();
         while(it1!=enrutadores.end() and it2!=costos.end()){
-            if(*it1!=enrt){
+            if(*it1!=enrt and *it1!=cad){
                 Auxiliar.push_back(*it1);
                 aux.push_back(*it2);
             }
             else{
-                for(int i=0; i<longitud2;i++){
-                    if(nuevo[i]==','){
-                        pass=true;
-                        i++;
-                    }
-                    if(pass){
-                        if(cont>0){
-                            numero2*=10;
-                            num=enlace[i];
-                            num-=48;
-                            numero2+=num;
-                        }
-                        else{
-                            numero2=enlace[i];
-                            numero2-=48;
-                        }
-                        cont++;
-                    }
-                    else{
-                        enrt2=enlace[i];
-                    }
+                Auxiliar.push_back(enrt);
+                aux.push_back(nuevo);
+                Auxiliar.push_back(cad);
+                aux.push_back(nuevo);
                 }
-                Auxiliar.push_back(enrt2);
-                aux.push_back(numero2);
-            }
-            it1++;
-            it2++;
+           it1++;
+           it2++;
         }
-
-    }
-    else{
-        system("CLS");
-        cout<<"Digito un numero o caracter no reconocido"<<endl;
-    }
+    enrutadores=Auxiliar;
+    costos=aux;
     system("CLS");
     cout<<"Cambio exitoso"<<endl;
 }

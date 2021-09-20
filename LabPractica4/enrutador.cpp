@@ -10,6 +10,7 @@ Enrutador::Enrutador(list<string> cdirecta,list<int> costos)
     it=cdirecta.begin();
     it2=costos.begin();
 
+    //ciclo que almacena las rutas directas en un mapa
     while(it!=cdirecta.end() and it2!=costos.end()){
         RutaDirecta[*it]=*it2;
         it++;
@@ -35,6 +36,7 @@ map<string,int> Enrutador::TablaDeEnrtActualizada(list<string> conexiones,list<i
     longitud=cadena.size();
     ultima2=cadena[longitud-1];
 
+    //ciclo que calcula los caminos con los costos minimos de un enrutador origen a uno destino y los almacena en un mapa
     while(it!=conexiones.end() and it2!=costos.end()){
         cadena=*it;
         longitud=cadena.size();

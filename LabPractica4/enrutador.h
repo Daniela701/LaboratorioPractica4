@@ -9,6 +9,7 @@ using namespace std;
 class Enrutador
 {
 private:
+    //contenedores
     map<string,int> RutaDirecta, TablaDeEnrutamiento;
 public:
     Enrutador(list<string>,list<int>);
